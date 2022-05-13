@@ -4,16 +4,19 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// #define PORT 80
+#define PORT 8080
 
 int main(int argc, char **argv){
+
+  argc = 0;
+  (void)argv;
 
   int server_fd, new_socket;
   long valread;
   struct sockaddr_in address;
   int address_len = sizeof(address);
 
-  std::string hello = "Hello from the server";
+  char hello[20] = "Hello from server";
 
   if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
     std::cerr << "cannot creat socket" << std::endl; 
@@ -22,8 +25,8 @@ int main(int argc, char **argv){
 
   // memset((char *)&address, 0, (size_t)address_len);
   address.sin_family = AF_INET;
-  address.sin_addr.s_addr = htonl(INADDR_ANY);
-  address.sin_port = htons(80);
+  address.sin_addr.s_addr = INADDR_ANY;
+  address.sin_port = htons(PORT);
 
   if (bind(server_fd, (struct sockaddr*)&address, address_len) < 0){
     std::cerr << "bind does not working" << std::endl;
@@ -37,17 +40,16 @@ int main(int argc, char **argv){
 
   while(1){
 
-    // std::cout << "waiting for a new connection" << std::endl; if second par of listen more than 0
+    std::cout << "waiting for a new connection" << std::endl;
     if ((new_socket = accept(server_fd, (struct sockaddr*) &address, (socklen_t*)&address_len)) < 0){
       std::cerr << "In accept" << std::endl;
       exit(EXIT_FAILURE);
     }
 
-    std::string buffer[1024] = {0};
-    if ((valread = read(new_socket, buffer, buffer->length())) < 0)
-      std::cerr << "No bytes are there to read" << std::endl;
+    char buffer[1024] = {0};
+    valread = read( new_socket , buffer, 1024);
 
-    write(new_socket , hello.c_str() , hello.length());
+    write(new_socket , hello , strlen(hello));
     std::cout << "Hello msg sent" << std::endl;
     close(new_socket);
   }
