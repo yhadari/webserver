@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <sys/select.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -57,7 +58,6 @@ class Server{
       close(new_socket);
     }
   }
-  //int getserverfd
 };
 
 int main(int argc, char **argv){
