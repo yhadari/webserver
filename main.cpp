@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define PORT 8080
-// #define PORT 80
+// #define PORT 8080
+#define PORT 80
 
 int main(int argc, char **argv){
 
@@ -18,6 +18,7 @@ int main(int argc, char **argv){
   int address_len = sizeof(address);
 
   char hello[20] = "Hello from server";
+  // char hello[100] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 
   if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
     std::cerr << "cannot creat socket" << std::endl; 
@@ -49,6 +50,7 @@ int main(int argc, char **argv){
 
     char buffer[1024] = {0};
     valread = read( new_socket , buffer, 1024);
+    std::cout << buffer << std::endl;
 
     write(new_socket , hello , strlen(hello));
     std::cout << "Hello msg sent" << std::endl;
