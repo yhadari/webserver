@@ -13,4 +13,8 @@ clean:
 	
 fclean: clean
 
+test: 
+	@clear
+	@c++ -Wall -Wextra -Werror test.cpp -o $(NAME)
+
 re: fclean all

@@ -23,12 +23,14 @@ class Server{
     _address.sin_addr.s_addr = addr;
     _address.sin_port = htons(port);
 
+    setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, &(_server_fd), sizeof(_server_fd));
     if (bind(_server_fd, (struct sockaddr*)&_address, _address_len) < 0){
       std::cerr << "bind does not working" << std::endl;
       exit(EXIT_FAILURE);
     }
 
-    if (listen(_server_fd, 0) < 0){
+    //limit backlog is 128
+    if (listen(_server_fd, 128) < 0){
       std::cerr << "In listen" << std::endl;
       exit(EXIT_FAILURE);
     }
@@ -74,7 +76,7 @@ int main(int argc, char **argv){
 
   //setup server
   Server server1(8080, INADDR_ANY); 
-  Server server2(8000, INADDR_ANY);
+  Server server2(8081, INADDR_ANY);
 
   fd_set CurrentSockets, ReadySocket;
 
