@@ -15,6 +15,6 @@ fclean: clean
 
 test: 
 	@clear
-	@c++ -Wall -Wextra -Werror test.cpp -o $(NAME)
+	@c++ -Wall -Wextra -Werror test.cpp server_setup.cpp -o $(NAME)
 
 re: fclean all

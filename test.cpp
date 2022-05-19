@@ -11,40 +11,51 @@ class Server{
   private:
   int _server_fd;
   struct sockaddr_in _address;
+  std::vector<int> v_server_fd;
+  std::vector<struct sockaddr_in> v__address;
   int _address_len;
   int opt;
 
   public:
-  Server(uint16_t port, uint32_t addr) : _address_len(sizeof(_address)), opt(1){
-    if ((_server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
-      std::cerr << "cannot creat socket" << std::endl; 
-      exit(EXIT_FAILURE);
+  Server(std::vector<ServerSetup> servers) : opt(1){
+
+    std::vector<ServerSetup>::iterator it(servers.begin());
+    size_t size = servers.size();
+
+    for (size_t i = 0; i < size; i++)
+    {
+      if ((_server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
+        std::cerr << "cannot creat socket" << std::endl; 
+        exit(EXIT_FAILURE);
+      }
+      v_server_fd.push_back(_server_fd);
+
+      _address.sin_family = AF_INET; // use IPv4 
+      _address.sin_port = htons((*it).listen.first);
+      _address.sin_addr.s_addr = (*it).listen.second;
+      it++;
+      v__address.push_back(_address);
+
+      if (setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))){
+        std::cerr << "setsockpt error" << std::endl;
+        exit(EXIT_FAILURE);
+      }
+
+      if (bind(_server_fd, (struct sockaddr*)&_address, _address_len) < 0){
+        std::cerr << "bind does not working" << std::endl;
+        exit(EXIT_FAILURE);
+      }
+
+      //limit backlog is 128
+      if (listen(_server_fd, 128) < 0){
+        std::cerr << "In listen" << std::endl;
+        exit(EXIT_FAILURE);
+      }
     }
-
-    _address.sin_family = AF_INET; // use IPv4 
-    _address.sin_addr.s_addr = addr;
-    _address.sin_port = htons(port);
-
-    if (setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))){
-      std::cerr << "setsockpt error" << std::endl;
-      exit(EXIT_FAILURE);
-    }
-
-    if (bind(_server_fd, (struct sockaddr*)&_address, _address_len) < 0){
-      std::cerr << "bind does not working" << std::endl;
-      exit(EXIT_FAILURE);
-    }
-
-    //limit backlog is 128
-    if (listen(_server_fd, 128) < 0){
-      std::cerr << "In listen" << std::endl;
-      exit(EXIT_FAILURE);
-    }
-
   }
 
-  int GetServerFd(){
-    return _server_fd;
+  std::vector<int> GetServerFds(){
+    return v_server_fd;
   }
 
   int AcceptNewConnection(){
@@ -74,32 +85,54 @@ class Server{
 
 };
 
+std::vector<ServerSetup> parse(){
+
+  std::vector<ServerSetup> VServers;
+  size_t s = 10;
+
+  ServerSetup servers[s];
+  std::pair<short, u_int32_t> p[s];
+
+  for (size_t i = 0; i < s; i++)
+  {
+    p[i] = std::make_pair(8080+i, INADDR_ANY);
+    servers[i].listen = p[i];
+    VServers.push_back(servers[i]);
+  }
+
+  return VServers;
+}
+
+fd_set  set_fds(std::vector<int> server_fds){
+
+  fd_set CurrentSockets;
+  size_t size = server_fds.size();
+  std::vector<int>::iterator it(server_fds.begin());
+
+  FD_ZERO(&CurrentSockets);
+  for (size_t i = 0; i < size; i++)
+    FD_SET((*it++), &CurrentSockets);
+
+  return CurrentSockets;
+}
+
 int main(int argc, char **argv){
 
   argc = 0;
   (void)argv;
-  // std::vector<ServerSetup> servers = parse();
 
-  ServerSetup S;
-
-  std::pair<short, u_int32_t> listen(80, INADDR_ANY);
-  S.listen = listen;
+  std::vector<ServerSetup> servers_setup = parse();
 
   //setup server
-  Server server1(listen.first, listen.second); 
-  Server server2(listen.first, listen.second); 
-
-  fd_set CurrentSockets, ReadySocket;
-
+  Server server(servers_setup); 
 
   //initialize my current set
-  FD_ZERO(&CurrentSockets);
-  FD_SET(server1.GetServerFd(), &CurrentSockets);
-  FD_SET(server2.GetServerFd(), &CurrentSockets);
+
+  fd_set ReadySocket;
+  //because select desetructive
+  ReadySocket = set_fds(server.GetServerFds());
 
   while (1){
-    //because select desetructive
-    ReadySocket = CurrentSockets;
 
     //FD_SETSIZE: Max FD Socket Can Support
     if (select(FD_SETSIZE, &ReadySocket, NULL, NULL, NULL) < 0){
