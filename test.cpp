@@ -11,13 +11,13 @@ class Server{
   private:
   int _server_fd;
   struct sockaddr_in _address;
-  std::vector<int> v_server_fd;
-  std::vector<struct sockaddr_in> v__address;
+  std::vector<int> _v_server_fd;
+  std::vector<struct sockaddr_in> _v_address;
   int _address_len;
   int opt;
 
   public:
-  Server(std::vector<ServerSetup> servers) : opt(1){
+  Server(std::vector<ServerSetup> servers) : _address_len(sizeof(_address)), opt(1){
 
     std::vector<ServerSetup>::iterator it(servers.begin());
     size_t size = servers.size();
@@ -28,13 +28,14 @@ class Server{
         std::cerr << "cannot creat socket" << std::endl; 
         exit(EXIT_FAILURE);
       }
-      v_server_fd.push_back(_server_fd);
+      _v_server_fd.push_back(_server_fd);
 
+      memset(&_address, 0, _address_len);
       _address.sin_family = AF_INET; // use IPv4 
       _address.sin_port = htons((*it).listen.first);
       _address.sin_addr.s_addr = (*it).listen.second;
       it++;
-      v__address.push_back(_address);
+      _v_address.push_back(_address);
 
       if (setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))){
         std::cerr << "setsockpt error" << std::endl;
@@ -55,15 +56,16 @@ class Server{
   }
 
   std::vector<int> GetServerFds(){
-    return v_server_fd;
+    return _v_server_fd;
   }
 
-  int AcceptNewConnection(){
+  //pair<server, possition>
+  int AcceptNewConnection(std::pair<int, size_t> pair){
 
     int new_socket;
 
     std::cout << "waiting for a new connection" << std::endl;
-    if ((new_socket = accept(_server_fd, (struct sockaddr*) &_address, (socklen_t*)&_address_len)) < 0){
+    if ((new_socket = accept(pair.first, (struct sockaddr*) &_v_address[pair.second], (socklen_t*)&_address_len)) < 0){
       std::cerr << "In accept" << std::endl;
       exit(EXIT_FAILURE);
     }
@@ -85,10 +87,10 @@ class Server{
 
 };
 
-std::vector<ServerSetup> parse(){
+std::vector<ServerSetup> parser(){
 
   std::vector<ServerSetup> VServers;
-  size_t s = 10;
+  size_t s = 11;
 
   ServerSetup servers[s];
   std::pair<short, u_int32_t> p[s];
@@ -116,23 +118,39 @@ fd_set  set_fds(std::vector<int> server_fds){
   return CurrentSockets;
 }
 
+//pair<is_find , pair<server_fd, possition>>
+std::pair<bool, std::pair<int, size_t> >  find_fd(int fd, std::vector<int> server_fds){
+    size_t size = server_fds.size();
+    std::vector<int>::iterator it(server_fds.begin());
+
+    for (size_t i = 0; i < size; i++)
+    {
+      if (fd == *it)
+        return  std::make_pair(true, std::make_pair(*it, i));
+      it++;
+    }
+    return std::make_pair(false, std::make_pair(0, 0));
+}
+
 int main(int argc, char **argv){
 
   argc = 0;
   (void)argv;
 
-  std::vector<ServerSetup> servers_setup = parse();
+  std::vector<ServerSetup> servers_setup = parser();
 
   //setup server
   Server server(servers_setup); 
 
   //initialize my current set
-
-  fd_set ReadySocket;
-  //because select desetructive
-  ReadySocket = set_fds(server.GetServerFds());
+  fd_set CurrentSockets, ReadySocket;
+  CurrentSockets = set_fds(server.GetServerFds());
 
   while (1){
+
+    std::pair<bool, std::pair<int, size_t> > search_fd;
+    // select desruct all sockets
+    ReadySocket = CurrentSockets;
 
     //FD_SETSIZE: Max FD Socket Can Support
     if (select(FD_SETSIZE, &ReadySocket, NULL, NULL, NULL) < 0){
@@ -144,15 +162,9 @@ int main(int argc, char **argv){
 
       if (FD_ISSET(i, &ReadySocket)){
 
-        if (i == server1.GetServerFd()){
+        if ((search_fd = find_fd(i, server.GetServerFds())).first){
           //this is a new connection
-          int client_socket = server1.AcceptNewConnection();
-          FD_SET(client_socket, &CurrentSockets);
-        }
-
-        else if (i == server2.GetServerFd()){
-          //this is a new connection
-          int client_socket = server2.AcceptNewConnection();
+          int client_socket = server.AcceptNewConnection(search_fd.second);
           FD_SET(client_socket, &CurrentSockets);
         }
         
