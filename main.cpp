@@ -65,7 +65,7 @@ int main(int argc, char **argv){
   argc = 0;
   (void)argv;
 
-  Server server1(8080, INADDR_ANY);
+  Server server1(80, INADDR_ANY);
   server1.Start();
   return 0;
 }
