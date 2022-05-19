@@ -1,10 +1,17 @@
 NAME = webserv
+SRC =  	main.cpp \
+		parser_config/Token.cpp \
+		parser_config/Lexer.cpp \
+		parser_config/SetupServer.cpp \
+		parser_config/Parser.cpp \
+		parser_config/utils.cpp \
+		server/test.cpp
 
 all : $(NAME)
 
-$(NAME): main.cpp
+$(NAME): $(SRC)
 	@clear
-	@c++ -Wall -Wextra -Werror main.cpp -o $(NAME)
+	@c++ -Wall -Wextra -Werror $(SRC) -o $(NAME)
 
 clean:
 	@ rm -rf *.gch
@@ -12,9 +19,5 @@ clean:
 	@rm -rf $(NAME)
 	
 fclean: clean
-
-test: 
-	@clear
-	@c++ -Wall -Wextra -Werror test.cpp server_setup.cpp -o $(NAME)
 
 re: fclean all

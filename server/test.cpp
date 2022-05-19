@@ -4,7 +4,12 @@
 #include <sys/select.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "server_setup.hpp"
+#include "../parser_config/include/Parser.hpp"
+
+#include <iostream>
+#include <fstream>
+#include <iostream>
+#include <sstream> //std::stringstream
 
 class Server{
 
@@ -87,23 +92,23 @@ class Server{
 
 };
 
-std::vector<ServerSetup> parser(){
+// std::vector<ServerSetup> parser(){
 
-  std::vector<ServerSetup> VServers;
-  size_t s = 11;
+//   std::vector<ServerSetup> VServers;
+//   size_t s = 11;
 
-  ServerSetup servers[s];
-  std::pair<short, u_int32_t> p[s];
+//   ServerSetup servers[s];
+//   std::pair<short, u_int32_t> p[s];
 
-  for (size_t i = 0; i < s; i++)
-  {
-    p[i] = std::make_pair(8080+i, INADDR_ANY);
-    servers[i].listen = p[i];
-    VServers.push_back(servers[i]);
-  }
+//   for (size_t i = 0; i < s; i++)
+//   {
+//     p[i] = std::make_pair(8080+i, INADDR_ANY);
+//     servers[i].listen = p[i];
+//     VServers.push_back(servers[i]);
+//   }
 
-  return VServers;
-}
+//   return VServers;
+// }
 
 fd_set  set_fds(std::vector<int> server_fds){
 
@@ -132,12 +137,42 @@ std::pair<bool, std::pair<int, size_t> >  find_fd(int fd, std::vector<int> serve
     return std::make_pair(false, std::make_pair(0, 0));
 }
 
+std::string fileToSring(const char *file)
+{
+    std::ifstream inFile;
+    inFile.open(file); //open the input file
+
+    std::stringstream strStream;
+    strStream << inFile.rdbuf(); //read the file
+    std::string str = strStream.str(); //str holds the content of the file
+
+    inFile.close();
+    return(str);
+}
+
+std::vector<ServerSetup> parseConfig(int argc, char **argv)
+{
+    std::string contents;
+    if (argc == 2)
+        contents = fileToSring(argv[1]);
+    else
+        contents = fileToSring(std::string("test.config").c_str());
+     Lexer lexer(contents);
+    // Token token(TOKEN_EOF, "\0");
+    // while((token = lexer.getNextToken()).type != TOKEN_EOF)
+    //     std::cout << "Token \"" << token.type << " | value = \"" << token.value << "\"" << std::endl;
+
+    Parser parser(lexer);
+    std::vector<ServerSetup> servers; 
+    return (parser.parse());
+}
+
 int main(int argc, char **argv){
 
   argc = 0;
   (void)argv;
 
-  std::vector<ServerSetup> servers_setup = parser();
+  std::vector<ServerSetup> servers_setup = parseConfig(argc, argv);
 
   //setup server
   Server server(servers_setup); 
