@@ -1,45 +1,8 @@
 #include "include/Utils.hpp"
 #include "include/Server.hpp"
 
-std::string fileToSring(const char *file)
+void   run(std::vector<ServerSetup> servers_setup)
 {
-    std::ifstream inFile;
-    inFile.open(file); //open the input file
-
-    std::stringstream strStream;
-    strStream << inFile.rdbuf(); //read the file
-    std::string str = strStream.str(); //str holds the content of the file
-
-    inFile.close();
-    return(str);
-}
-
-std::vector<ServerSetup> parseConfig(int argc, char **argv)
-{
-    std::string contents;
-    if (argc == 2)
-        contents = fileToSring(argv[1]);
-    else
-        contents = fileToSring(std::string("test.config").c_str());
-     Lexer lexer(contents);
-    // Token token(TOKEN_EOF, "\0");
-    // while((token = lexer.getNextToken()).type != TOKEN_EOF)
-    //     std::cout << "Token \"" << token.type << " | value = \"" << token.value << "\"" << std::endl;
-
-    Parser parser(lexer);
-    std::vector<ServerSetup> servers; 
-    return (parser.parse());
-}
-
-int main(int argc, char **argv){
-
-  argc = 0;
-  (void)argv;
-
-  std::vector<ServerSetup> servers_setup = parseConfig(argc, argv);
-  // std::vector<ServerSetup>::iterator it(servers_setup.begin());
-
-  //setup server
   Server server(servers_setup); 
 
   //initialize my current set
@@ -80,5 +43,44 @@ int main(int argc, char **argv){
       }
     }
   }
+}
+
+std::vector<ServerSetup> parseConfig(int argc, char **argv)
+{
+    std::string contents;
+    if (argc == 2)
+        contents = fileToSring(argv[1]);
+    else
+        contents = fileToSring(std::string("test.config").c_str());
+     Lexer lexer(contents);
+    // Token token(TOKEN_EOF, "\0");
+    // while((token = lexer.getNextToken()).type != TOKEN_EOF)
+    //     std::cout << "Token \"" << token.type << " | value = \"" << token.value << "\"" << std::endl;
+
+    Parser parser(lexer);
+    std::vector<ServerSetup> servers; 
+    return (parser.parse());
+}
+
+int main(int argc, char **argv){
+
+
+    // ------------------- Parsing Config File ------------------- //
+
+    std::vector<ServerSetup> servers_setup = parseConfig(argc, argv);
+    // --------------------- Test Parsing ------------------------ //
+
+    // for (int i = 0; i < (int)servers.size() ;i++)
+    //     std::cout << "Server: " << i
+    //             << " | Server name1: " << servers[i].getServer_name()[0]
+    //             << " | Error pages: " <<  servers[i].getError_pages()[0].second
+    //             << " port: "<< servers[i].getListen().first << std::endl;
+
+    // std::cout << "Server: 0 | " << servers[0].getLocations()[1].path << std::endl;
+    // std::cout << "Server: 0 | " << servers[0].getLocations()[1].error_pages[0].second << std::endl;
+    // --------------------- Run Server --------------------------- //
+    //setup server
+    run(servers_setup);
+
   return EXIT_SUCCESS;
 }

@@ -1,4 +1,5 @@
 #include "../include/Utils.hpp"
+#include <string>
 
 void set_fds(fd_set &CurrentSockets, std::vector<int> server_fds){
 
@@ -22,4 +23,37 @@ std::pair<bool, std::pair<int, size_t> >  find_fd(int fd, std::vector<int> serve
       it++;
     }
     return std::make_pair(false, std::make_pair(0, 0));
+}
+
+int     stringToInt(const std::string s)
+{
+    for (int i = 0; i < (int)s.length() ; i++)
+    {
+        if (!std::isdigit(s[i]))
+        {
+            std::cerr << "\"" << s << "\" Not a valid Number!" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    }   
+    return (atoi(s.c_str()));
+}
+
+bool isNumber(const std::string& s)
+{
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
+
+std::string fileToSring(const char *file)
+{
+    std::ifstream inFile;
+    inFile.open(file); //open the input file
+
+    std::stringstream strStream;
+    strStream << inFile.rdbuf(); //read the file
+    std::string str = strStream.str(); //str holds the content of the file
+
+    inFile.close();
+    return(str);
 }

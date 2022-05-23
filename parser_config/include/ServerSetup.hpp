@@ -19,7 +19,9 @@ typedef struct s_location
 
 class ServerSetup
 {
-    public:
+    friend class Parser;
+
+    private:
     //------ public member --------- >>
     std::pair<short, u_int32_t>                 listen;                 // listen               80 0.0.0.0;
     std::vector<std::string>                    server_name;            // server_name          server1 server2;
@@ -31,17 +33,33 @@ class ServerSetup
     std::string                                 autoindex;              // autoindex            off;
     std::vector<t_location>                     locations;              // locations            location /upload {}
 
+    public:
     // --------------------------------------------------------- //
     // --------------- Constructors and Operators -------------- //
     // --------------------------------------------------------- //
+   
     ServerSetup();
     ServerSetup(const ServerSetup& server_setup);
     ServerSetup&    operator=(const ServerSetup& server_setup);
 
     // --------------------------------------------------------- //
-    // ----------------- Non Member Methods ------------------------ //
+    // -------------------- Getters  --------------------------- //
+    // --------------------------------------------------------- //
+    std::pair<short, u_int32_t>                 getListen() const;
+    std::vector<std::string>                    getServer_name() const;
+    std::string                                 getRoot() const;
+    std::vector<std::string>                    getIndex() const;  
+    std::vector<std::pair<short, std::string> > getError_pages() const;
+    int                                         getClient_max_body_size() const;
+    std::vector<std::string>                    getRequest_method() const;        
+    std::string                                 getAutoindex() const;             
+    std::vector<t_location>                     getLocations() const; 
+
+    // --------------------------------------------------------- //
+    // ----------------- Non Member Methods -------------------- //
     // --------------------------------------------------------- //
     static t_location initLocation();
+    
 
 };
 

@@ -9,6 +9,10 @@ enum  TypeToken
     OPEN_BRACKET,
     CLOSE_BRACKET,
     SEMICOLON,
+
+    TOKEN_COLON,
+    TOKEN_BODY,
+
     TOKEN_ERR,
     TOKEN_EOF
 };

@@ -1,5 +1,5 @@
 #include "include/Parser.hpp"
-#include "include/utils.hpp" // StringtoInt(), isNumber
+#include "../include/Utils.hpp" // StringtoInt(), isNumber
 #include <arpa/inet.h>  // inet_addr
 
 // --------------------------------------------------------- //
@@ -67,21 +67,21 @@ ServerSetup                 Parser::parseServer()
     while (curr_token.type != CLOSE_BRACKET && curr_token.type != TOKEN_EOF
             && curr_token.type != TOKEN_ERR)
     {
-        if (!curr_token.value.compare("listen"))
+        if (!curr_token.value.compare("listen") && server_setup.listen.first == -1)
             server_setup.listen = parseListen();
-        else if (!curr_token.value.compare("server_name"))
+        else if (!curr_token.value.compare("server_name") && server_setup.server_name.empty())
             server_setup.server_name = parseWords();
-        else if (!curr_token.value.compare("root"))
+        else if (!curr_token.value.compare("root") && !server_setup.root.length())
             server_setup.root = parseWord();
-        else if (!curr_token.value.compare("index"))
+        else if (!curr_token.value.compare("index") && server_setup.index.empty())
             server_setup.index = parseWords();
-        else if (!curr_token.value.compare("error_pages"))
+        else if (!curr_token.value.compare("error_pages") && server_setup.error_pages.empty())
             server_setup.error_pages = parseErrorPages();
-        else if (!curr_token.value.compare("client_max_body_size"))
+        else if (!curr_token.value.compare("client_max_body_size") && server_setup.client_max_body_size == -1)
             server_setup.client_max_body_size = stringToInt(parseWord());
-        else if (!curr_token.value.compare("request_method"))
+        else if (!curr_token.value.compare("request_method") && server_setup.request_method.empty())
             server_setup.request_method = parseWords();
-        else if (!curr_token.value.compare("autoindex"))
+        else if (!curr_token.value.compare("autoindex") && !server_setup.autoindex.length())
             server_setup.autoindex = parseWord();
         else if (!curr_token.value.compare("location"))
         {
@@ -99,13 +99,15 @@ ServerSetup                 Parser::parseServer()
 std::pair<short, u_int32_t> Parser::parseListen()
 {
    std::pair<short, u_int32_t>  listen;
-
+   
     this->eat(WORD); // listen
     this->eat(WORD); // port
     listen.first =  stringToInt(prev_token.value);
-    this->eat(WORD); // ip
-    listen.second = inet_addr(prev_token.value.c_str());
-
+    this->eat(WORD); // ip 
+    if (prev_token.value == "0.0.0.0" || prev_token.value == "127.0.0.1")
+        listen.second = inet_addr(prev_token.value.c_str());
+    else
+        errorDisplay(prev_token.value + ": IP address listening to is not a valid ip interface!");
     return (listen);
 }
 
@@ -167,17 +169,17 @@ t_location                  Parser::parseLocation()
     while (curr_token.type != CLOSE_BRACKET && curr_token.type != TOKEN_EOF
             && curr_token.type != TOKEN_ERR)
     {
-        if (!curr_token.value.compare("root"))
+        if (!curr_token.value.compare("root") && !location.root.length())
             location.root = parseWord();
-        else if (!curr_token.value.compare("index"))
+        else if (!curr_token.value.compare("index") && location.index.empty())
             location.index = parseWords();
-        else if (!curr_token.value.compare("error_pages"))
+        else if (!curr_token.value.compare("error_pages") && location.error_pages.empty())
             location.error_pages = parseErrorPages();
-        else if (!curr_token.value.compare("client_max_body_size"))
+        else if (!curr_token.value.compare("client_max_body_size") && location.client_max_body_size == -1)
             location.client_max_body_size = stringToInt(parseWord());
-        else if (!curr_token.value.compare("request_method"))
+        else if (!curr_token.value.compare("request_method") && location.request_method.empty())
             location.request_method = parseWords();
-        else if (!curr_token.value.compare("autoindex"))
+        else if (!curr_token.value.compare("autoindex") && !location.autoindex.length())
             location.autoindex = parseWord();
         else
             errorDisplay("Invalid Token");

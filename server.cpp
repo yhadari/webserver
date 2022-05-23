@@ -15,8 +15,8 @@ Server::Server(std::vector<ServerSetup> servers) : _address_len(sizeof(_address)
 
       memset(&_address, 0, _address_len);
       _address.sin_family = AF_INET; // use IPv4 
-      _address.sin_port = htons((*it).listen.first);
-      _address.sin_addr.s_addr = (*it).listen.second;
+      _address.sin_port = htons((*it).getListen().first);
+      _address.sin_addr.s_addr = (*it).getListen().second;
       it++;
       _v_address.push_back(_address);
 
