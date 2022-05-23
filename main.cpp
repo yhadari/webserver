@@ -1,0 +1,84 @@
+#include "include/Utils.hpp"
+#include "include/Server.hpp"
+
+std::string fileToSring(const char *file)
+{
+    std::ifstream inFile;
+    inFile.open(file); //open the input file
+
+    std::stringstream strStream;
+    strStream << inFile.rdbuf(); //read the file
+    std::string str = strStream.str(); //str holds the content of the file
+
+    inFile.close();
+    return(str);
+}
+
+std::vector<ServerSetup> parseConfig(int argc, char **argv)
+{
+    std::string contents;
+    if (argc == 2)
+        contents = fileToSring(argv[1]);
+    else
+        contents = fileToSring(std::string("test.config").c_str());
+     Lexer lexer(contents);
+    // Token token(TOKEN_EOF, "\0");
+    // while((token = lexer.getNextToken()).type != TOKEN_EOF)
+    //     std::cout << "Token \"" << token.type << " | value = \"" << token.value << "\"" << std::endl;
+
+    Parser parser(lexer);
+    std::vector<ServerSetup> servers; 
+    return (parser.parse());
+}
+
+int main(int argc, char **argv){
+
+  argc = 0;
+  (void)argv;
+
+  std::vector<ServerSetup> servers_setup = parseConfig(argc, argv);
+  // std::vector<ServerSetup>::iterator it(servers_setup.begin());
+
+  //setup server
+  Server server(servers_setup); 
+
+  //initialize my current set
+  fd_set CurrentSockets, ReadySocket;
+  set_fds(CurrentSockets, server.GetServerFds());
+
+  while (1){
+
+    std::cout << "waiting for a new connection" << std::endl;
+    std::pair<bool, std::pair<int, size_t> > search_fd;
+    // select destruct all sockets
+    ReadySocket = CurrentSockets;
+
+    //FD_SETSIZE: Max FD Socket Can Support
+    if (select(FD_SETSIZE, &ReadySocket, NULL, NULL, NULL) < 0){
+      std::cerr << "In select" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < FD_SETSIZE; i++){
+
+      if (FD_ISSET(i, &ReadySocket)){
+
+        if ((search_fd = find_fd(i, server.GetServerFds())).first){
+          //this is a new connection
+          int client_socket = server.AcceptNewConnection(search_fd.second);
+          FD_SET(client_socket, &CurrentSockets);
+        }
+        
+        else{
+          // search_fd = find_fd(i, server.GetServerFds());
+          // // std::cout << (*(it+((search_fd.second).second))).client_max_body_size << std::endl;
+          // // std::cout << "|possition is: " << (search_fd.second).second << std::endl;
+          // std::cout << "|find: " << search_fd.first << std::endl;
+          Server::handleConnection(i);
+          FD_CLR(i, &CurrentSockets);
+        }
+      }
+    }
+  }
+  return EXIT_SUCCESS;
+}

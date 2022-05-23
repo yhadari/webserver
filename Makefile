@@ -1,11 +1,12 @@
 NAME = webserv
-SRC =  	main.cpp \
+
+SRC =  	Server.cpp  main.cpp\
 		parser_config/Token.cpp \
 		parser_config/Lexer.cpp \
 		parser_config/SetupServer.cpp \
 		parser_config/Parser.cpp \
 		parser_config/utils.cpp \
-		server/test.cpp
+		utilities/Utils.cpp
 
 all : $(NAME)
 
