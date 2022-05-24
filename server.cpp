@@ -1,4 +1,9 @@
 #include "include/Server.hpp"
+#include "include/Utils.hpp"
+
+#include "parser_request/include/ParserRe.hpp"
+#include "parser_request/include/RequestInfo.hpp"
+#include "response/Response.hpp"
 
 Server::Server(std::vector<ServerSetup> servers) : _address_len(sizeof(_address)), opt(1){
 
@@ -31,9 +36,11 @@ Server::Server(std::vector<ServerSetup> servers) : _address_len(sizeof(_address)
         exit(EXIT_FAILURE);
       }
 
-      if (bind(_server_fd, (struct sockaddr*)&_address, _address_len) < 0){
-        std::cerr << "bind does not working" << std::endl;
-        exit(EXIT_FAILURE);
+      if (!samePort(_v_address)){
+        if (bind(_server_fd, (struct sockaddr*)&_address, _address_len) < 0){
+          std::cerr << "bind does not working" << std::endl;
+          exit(EXIT_FAILURE);
+        }
       }
 
       //limit backlog is 128
@@ -61,14 +68,28 @@ Server::Server(std::vector<ServerSetup> servers) : _address_len(sizeof(_address)
 
   }
     
-   void Server::handleConnection(int new_socket){
+   void Server::handleConnection(std::vector<ServerSetup>::iterator server_it, int new_socket){
 
-    char response[100] = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+    // char response[500] = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 47\r\n\r\n<html><head></head><h1>Hello world!</h1></html>\r\n\r\n";
+    std::cout << "size is: " << (*server_it).getClient_max_body_size() << std::endl;
+    std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 37\r\n\r\n<html><body><h2>ok</h2>";
     long valread;
     char request[1024] = {0};
+
+    // Reading Request
     valread = recv(new_socket, request, 1024, 0);
-    std::cout << "--------------------------begin-------------------------" <<std::endl;
+
+    // ---------------------- Parsing The Request ------------------------------ //
+    LexerRe lexer(request);
+    ParserRe parser(lexer);
+    RequestInfo request_info =  parser.parse();
+
+    // ---------------------- Test Request Parser ------------------------- //
+    // std::cout << request_info.getHTTP_version() << " | " << request_info.getRequest_target() << std::endl;
     std::cout << request << std::endl;
-    send(new_socket, response, strlen(response), 0);
+
+
+    send(new_socket, response.c_str(), response.length(), 0);
+    std::cout << "\n+++++++ Hello message sent ++++++++\n" << std::endl;
     close(new_socket);
   }

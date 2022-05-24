@@ -18,8 +18,9 @@ class Server{
   Server(std::vector<ServerSetup> servers);
   std::vector<int> GetServerFds();
   //pair<server, possition>
-  int AcceptNewConnection(std::pair<int, size_t> pair);
-  static void handleConnection(int new_socket);
+  int     AcceptNewConnection(std::pair<int, size_t> pair);
+  static  void handleConnection(std::vector<ServerSetup>::iterator server_it, int new_socket);
+  // static  void handleConnection(int new_socket);
 
 };
 

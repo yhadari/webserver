@@ -3,6 +3,7 @@
 
 void   run(std::vector<ServerSetup> servers_setup)
 {
+  std::vector<ServerSetup>::iterator it_b(servers_setup.begin());
   Server server(servers_setup); 
 
   //initialize my current set
@@ -11,6 +12,7 @@ void   run(std::vector<ServerSetup> servers_setup)
 
   while (1){
 
+    std::vector<ServerSetup>::iterator server_it;
     std::cout << "waiting for a new connection" << std::endl;
     std::pair<bool, std::pair<int, size_t> > search_fd;
     // select destruct all sockets
@@ -29,15 +31,13 @@ void   run(std::vector<ServerSetup> servers_setup)
         if ((search_fd = find_fd(i, server.GetServerFds())).first){
           //this is a new connection
           int client_socket = server.AcceptNewConnection(search_fd.second);
+          server_it = it_b+(search_fd.second).second;
           FD_SET(client_socket, &CurrentSockets);
         }
         
         else{
-          // search_fd = find_fd(i, server.GetServerFds());
-          // // std::cout << (*(it+((search_fd.second).second))).client_max_body_size << std::endl;
-          // // std::cout << "|possition is: " << (search_fd.second).second << std::endl;
-          // std::cout << "|find: " << search_fd.first << std::endl;
-          Server::handleConnection(i);
+          // Server::handleConnection(i);
+          Server::handleConnection(server_it, i);
           FD_CLR(i, &CurrentSockets);
         }
       }

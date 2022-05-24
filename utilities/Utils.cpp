@@ -1,6 +1,23 @@
 #include "../include/Utils.hpp"
 #include <string>
 
+bool    samePort(std::vector<struct sockaddr_in> v_address){
+
+    if (v_address.size() > 1){
+
+        std::vector<struct sockaddr_in>::iterator it_b(v_address.begin());
+        std::vector<struct sockaddr_in>::iterator it_e(v_address.end());
+
+        struct sockaddr_in _address = *(--it_e);
+        
+        while(it_b != it_e){
+            if (_address.sin_port == (*it_b++).sin_port)
+                return true;
+        }
+    }
+    return false;
+}
+
 void set_fds(fd_set &CurrentSockets, std::vector<int> server_fds){
 
   size_t size = server_fds.size();

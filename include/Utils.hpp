@@ -15,6 +15,7 @@
 void set_fds(fd_set &CurrentSockets, std::vector<int> server_fds);
 //pair<is_find , pair<server_fd, possition>>
 std::pair<bool, std::pair<int, size_t> >  find_fd(int fd, std::vector<int> server_fds);
+bool    samePort(std::vector<struct sockaddr_in> v_address);
 
 int     stringToInt(const std::string s);
 bool    isNumber(const std::string& s);
