@@ -37,7 +37,7 @@ void   run(std::vector<ServerSetup> servers_setup)
         
         else{
           // Server::handleConnection(i);
-          Server::handleConnection(server_it, i);
+          Server::handleConnection(*server_it, i);
           FD_CLR(i, &CurrentSockets);
         }
       }

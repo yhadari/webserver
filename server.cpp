@@ -68,10 +68,10 @@ Server::Server(std::vector<ServerSetup> servers) : _address_len(sizeof(_address)
 
   }
     
-   void Server::handleConnection(std::vector<ServerSetup>::iterator server_it, int new_socket){
+   void Server::handleConnection(ServerSetup server_setup, int new_socket){
 
     // char response[500] = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 47\r\n\r\n<html><head></head><h1>Hello world!</h1></html>\r\n\r\n";
-    std::cout << "size is: " << (*server_it).getClient_max_body_size() << std::endl;
+    std::cout << "name is: " << server_setup.getServer_name().at(0) << std::endl;
     std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 37\r\n\r\n<html><body><h2>ok</h2>";
     long valread;
     char request[1024] = {0};
