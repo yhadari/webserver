@@ -74,3 +74,60 @@ std::string fileToSring(const char *file)
     inFile.close();
     return(str);
 }
+
+// Split a string to vector of string by a delimter string
+std::vector<std::string> split(std::string s, std::string del = " ")
+{
+
+    std::vector<std::string> values;
+
+    int start = 0;
+    int end = s.find(del);
+    while (end != -1) {
+        values.push_back(s.substr(start, end - start));
+        start = end + del.size();
+        end = s.find(del, start);
+    }
+    values.push_back(s.substr(start, end - start));
+    return (values);
+}
+
+// Size of file
+long    sizeFile(std::string path)
+{
+    long begin, end;
+    std::ifstream myfile (path);
+    begin = myfile.tellg();   // tellg : 
+    myfile.seekg (0, std::ios::end);
+    end = myfile.tellg();
+    myfile.close();
+    return (end-begin);
+}
+
+
+// Get Type Of URI (Target Method Request
+TypeRequestTarget   getPathType(const std::string& uri)
+{
+    struct stat stats;
+    std::ifstream inFile(uri.c_str());
+    if(inFile.good()){
+        if (stat(uri.c_str(), &stats) == 0 && stats.st_mode == 16877)
+            return (IS_LOCATION); // is folder
+        else 
+            return (IS_FILE); // is File
+    }
+    if (inFile.is_open())
+        inFile.close();
+    return (IS_NOT_FOUND);
+}
+
+
+// count 
+int                  coutChar(const std::string &s, char del)
+{
+    int count = 0;
+    for (int i = 0; i < (int)s.size(); i++)
+        if (s[i] == del) count++;
+    return count;
+}
+

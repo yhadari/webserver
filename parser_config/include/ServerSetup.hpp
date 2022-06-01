@@ -1,13 +1,13 @@
-#ifndef __SERVER_SETUP__HPP__
-#define __SERVER_SETUP__HPP__
+#ifndef __SERVER_SETUP_HPP__
+#define __SERVER_SETUP_HPP__
 
 #include <iostream>
 #include <vector>
-
+#include "../../include/EnumRequestTarget.hpp"
 
 typedef struct s_location
 {
-    std::string                                 path;   // Ex: /root/local/ ,path of location, oblig
+    std::string                                 path;  // Ex: /root/local/ ,path of location, oblig
     std::string                                 root;
     std::vector<std::string>                    index;
     std::vector<std::pair<short, std::string> > error_pages;
@@ -20,6 +20,7 @@ typedef struct s_location
 class ServerSetup
 {
     friend class Parser;
+    friend class Response;
 
     private:
     //------ public member --------- >>
@@ -54,6 +55,11 @@ class ServerSetup
     std::vector<std::string>                    getRequest_method() const;        
     std::string                                 getAutoindex() const;             
     std::vector<t_location>                     getLocations() const; 
+
+    // --------------------------------------------------------- //
+    // -------------------- Member Methods --------------------- //
+    // --------------------------------------------------------- //
+    t_location*                                 getLocation(std::string uri, TypeRequestTarget *type) const;
 
     // --------------------------------------------------------- //
     // ----------------- Non Member Methods -------------------- //

@@ -1,6 +1,7 @@
 #include "include/Utils.hpp"
 #include "include/Server.hpp"
 
+
 void   run(std::vector<ServerSetup> servers_setup)
 {
   std::vector<ServerSetup>::iterator it_b(servers_setup.begin());
@@ -62,6 +63,7 @@ std::vector<ServerSetup> parseConfig(int argc, char **argv)
     return (parser.parse());
 }
 
+
 int main(int argc, char **argv){
 
 
@@ -78,9 +80,10 @@ int main(int argc, char **argv){
 
     // std::cout << "Server: 0 | " << servers[0].getLocations()[1].path << std::endl;
     // std::cout << "Server: 0 | " << servers[0].getLocations()[1].error_pages[0].second << std::endl;
+
     // --------------------- Run Server --------------------------- //
-    //setup server
     run(servers_setup);
 
-  return EXIT_SUCCESS;
+	  
+    return (EXIT_SUCCESS);
 }

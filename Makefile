@@ -14,8 +14,7 @@ SRC =  	Server.cpp  main.cpp\
 all : $(NAME)
 
 $(NAME): $(SRC)
-	@clear
-	@c++ -Wall -Wextra -Werror $(SRC) -o $(NAME)
+	@c++ -Wall -Wextra -Werror $(SRC) -o $(NAME) -g -fsanitize=address 
 
 clean:
 	@ rm -rf *.gch
@@ -25,3 +24,11 @@ clean:
 fclean: clean
 
 re: fclean all
+
+push : 
+	git add .
+	git commit -m "$(m)"
+	git push origin
+
+test:
+	@make re && ./webserv

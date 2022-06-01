@@ -1,5 +1,5 @@
 #include "include/ServerSetup.hpp"
-
+#include "../include/Utils.hpp"
 // --------------------------------------------------------- //
 // --------------- Constructors and Operators -------------- //
 // --------------------------------------------------------- //
@@ -83,10 +83,37 @@ std::vector<t_location>                     ServerSetup::getLocations() const
     return (this->locations);
 } 
 
-
+// --------------------------------------------------------- //
+// -------------------- Member Methods --------------------- //
+// --------------------------------------------------------- //
+t_location*                                  ServerSetup::getLocation(std::string uri, TypeRequestTarget *type) const
+{   
+    std::string path = getRoot() + uri;
+    if (getPathType(path) == IS_FILE)
+    {
+        *type = IS_FILE;
+        return (NULL);
+    }
+    // Chank the URI directories /../.../..
+    path = uri;
+    while (coutChar(path, '/') > 0) // plus two directory
+    {
+        for (size_t i = 0; i < getLocations().size(); i++)
+            if (getLocations()[i].path == path)
+            {
+                *type = IS_LOCATION;
+                t_location *location = new t_location();
+                *location = getLocations()[i];
+                return (location);
+            }
+         path = path.substr(0, path.find_last_of('/'));
+    }
+    *type = IS_NOT_FOUND;
+    return (NULL);
+}
 
 // --------------------------------------------------------- //
-// ----------------- Member Methods ------------------------ //
+// ---------------- Non Member Functions ------------------- //
 // --------------------------------------------------------- //
 t_location ServerSetup::initLocation()
 {
@@ -98,6 +125,6 @@ t_location ServerSetup::initLocation()
     location.client_max_body_size = -1;
     location.request_method =  std::vector<std::string>();
     location.autoindex = std::string();
-
     return (location);
 }
+

@@ -93,7 +93,7 @@ ServerSetup                 Parser::parseServer()
         this->eat(SEMICOLON);
     }
     this->eat(CLOSE_BRACKET);
-    return (server_setup);
+    return (CheckConfig(server_setup));
 }
 
 std::pair<short, u_int32_t> Parser::parseListen()
@@ -195,6 +195,15 @@ int                          Parser::eatServer()
         errorDisplay(ERR_MSG_CONTEXT_SERVER);
     this->eat(WORD); // server directive
     return (0);
+}
+
+ServerSetup                 Parser::CheckConfig(ServerSetup &server)
+{
+    if (server.getRoot().length() == 0)
+        errorDisplay(ERR_MSG_MONDATORY_CONFIG);
+    else if (server.getListen().first == -1)
+        errorDisplay(ERR_MSG_MONDATORY_CONFIG);
+    return (server);
 }
 
 //-------------------------------- Non Member Methods ----------------------- //

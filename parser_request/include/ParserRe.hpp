@@ -16,7 +16,7 @@ class ParserRe
     LexerRe lexer;
     Token   curr_token;
     Token   prev_token;
-
+    bool    _is_bad_req;
     // --------------------------------------------------------- //
     // --------------- Constructors and Operators -------------- //
     // --------------------------------------------------------- //
