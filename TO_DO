@@ -1,0 +1,38 @@
+* 1 - Autoindex
+* 2 - Handle chanked request
+* 3 - POST 
+* 4 - Delete 
+* 5 - Upload
+* 6 - Add redirection (return 301 link)
+* 7 - Stress server
+* 8 - Request server by name in cmd
+* 9 - Chanked request
+* 10 - Fix debug mode of parsing
+11 - Correction
+* 12 - add cgi in config parsing
+* 13 - folder/file with spaces in name
+Fix closed request
+
+
+
+!!!update setupserver 120  getLocation (is file) and 108 isLocation
+Chanked , request:
+    {
+        int     fd_new_socket;
+        Std:string request; var
+        int body_lenght ; const
+        int readed_body ; var
+
+    }
+
+To check :
+* - the select (or equivalent) should be in the main loop and should check fd for read and write AT THE SAME TIME
+- Search for all read/recv/write/send on a socket and check that if an error returned the client is removed / close connection!
+-  (checking only -1 or 0 is not good you should check both)
+* - Writing or reading ANY file descriptor without going through the select (or equivalent) 
+* - curl --resolve server1:8081:127.0.0.1 http://server1:8081/
+
+
+
+
+NOTE: comments tow of // system("cat /dev/null > /tmp/body_req.txt");

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="css/PagesStyle.css"> 
+</head>
+<body>
+
+<h2>Info Submitted !!</h2>
+
+<h3>Your First Name: </h3> <br />
+<b>Warning</b>:  Undefined array key "fname" in <b>/Users/yhadari/Desktop/Webserv/www/DisplayDataPost.php</b> on line <b>10</b><br />
+<h3>Your Last Name: </h3> <br />
+<b>Warning</b>:  Undefined array key "lname" in <b>/Users/yhadari/Desktop/Webserv/www/DisplayDataPost.php</b> on line <b>11</b><br />
+
+
+</body>
+</html>
